@@ -10,6 +10,7 @@ Port of [screen](https://github.com/inancgumus/screen) package in Go, to provide
    dependencies:
      screen:
        github: mdwagner/screen.cr
+       version: "~> 0.2.0"
    ```
 
 2. Run `shards install`
@@ -22,6 +23,8 @@ require "screen"
 Screen.clear # Clear all the characters on the screen
 
 Screen.move_top_left # Moves the cursor to the top-left position of the screen
+
+Screen.cls # Performs both methods above (typical `cls` or `clear` terminal behavior)
 ```
 
 ## Contributing
