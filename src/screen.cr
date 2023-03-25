@@ -53,7 +53,7 @@ module Screen
     {% if flag?(:win32) %}
       handle = LibC.GetStdHandle(LibC::STD_OUTPUT_HANDLE)
       cursor = LibC::COORD.new(x: 0, y: 0)
-      h = get_screen
+      LibC.GetConsoleScreenBufferInfo(handle, out h)
       total = (h.dwSize.x * h.dwSize.y).to_u32
       LibC.FillConsoleOutputCharacterW(handle, ' '.ord, total, cursor, out _)
       LibC.FillConsoleOutputAttribute(handle, h.wAttributes, total, cursor, out _)
@@ -72,12 +72,4 @@ module Screen
       print "\033[H"
     {% end %}
   end
-
-  {% if flag?(:win32) %}
-    private def get_screen : LibC::ConsoleScreenBufferInfo
-      handle = LibC.GetStdHandle(LibC::STD_OUTPUT_HANDLE)
-      LibC.GetConsoleScreenBufferInfo(handle, out h)
-      h
-    end
-  {% end %}
 end
