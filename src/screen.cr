@@ -61,6 +61,7 @@ module Screen
 
       # Fill the entire screen with blanks
       return if LibC.FillConsoleOutputCharacterW(handle, ' '.ord, total, cursor, out _) == 0
+
       # Get the current text attribute
       return if LibC.GetConsoleScreenBufferInfo(handle, out h) == 0
 
