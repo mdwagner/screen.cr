@@ -1,10 +1,7 @@
 {% if flag?(:win32) %}
-  # https://learn.microsoft.com/en-us/windows/console/clearing-the-screen#example-3
-  # https://github.com/inancgumus/screen/blob/master/clear_windows.go
   lib LibC
     alias SHORT = Int16
     alias TCHAR = WCHAR
-    alias LPDWORD = DWORD*
 
     STD_INPUT_HANDLE  = -10.to_u32!
     STD_OUTPUT_HANDLE = -11.to_u32!
@@ -31,8 +28,8 @@
 
     fun GetConsoleScreenBufferInfo(hConsoleOutput : HANDLE, lpConsoleScreenBufferInfo : ConsoleScreenBufferInfo*) : BOOL
     fun SetConsoleCursorPosition(hConsoleOutput : HANDLE, dwCursorPosition : COORD) : BOOL
-    fun FillConsoleOutputCharacterW(hConsoleOutput : HANDLE, cCharacter : TCHAR, nLength : DWORD, dwWriteCoord : COORD, lpNumberOfCharsWritten : LPDWORD) : BOOL
-    fun FillConsoleOutputAttribute(hConsoleOutput : HANDLE, wAttribute : WORD, nLength : DWORD, dwWriteCoord : COORD, lpNumberOfAttrsWritten : LPDWORD) : BOOL
+    fun FillConsoleOutputCharacterW(hConsoleOutput : HANDLE, cCharacter : TCHAR, nLength : DWORD, dwWriteCoord : COORD, lpNumberOfCharsWritten : DWORD*) : BOOL
+    fun FillConsoleOutputAttribute(hConsoleOutput : HANDLE, wAttribute : WORD, nLength : DWORD, dwWriteCoord : COORD, lpNumberOfAttrsWritten : DWORD*) : BOOL
     fun GetStdHandle(nStdHandle : DWORD) : HANDLE
   end
 {% end %}
@@ -43,6 +40,9 @@ module Screen
   VERSION = {{ `shards version #{__DIR__}`.chomp.stringify }}
 
   # Clears the screen and resets cursor position
+  #
+  # linux/macos: https://github.com/inancgumus/screen/blob/master/clear_others.go
+  # win32: https://learn.microsoft.com/en-us/windows/console/clearing-the-screen#example-3
   def cls : Nil
     clear
     move_top_left
@@ -52,10 +52,19 @@ module Screen
   def clear : Nil
     {% if flag?(:win32) %}
       handle = LibC.GetStdHandle(LibC::STD_OUTPUT_HANDLE)
-      cursor = LibC::COORD.new(x: 0, y: 0)
-      LibC.GetConsoleScreenBufferInfo(handle, out h)
+      cursor = LibC::COORD.new # home for the cursor
+
+      # Get the number of character cells in the current buffer
+      return if LibC.GetConsoleScreenBufferInfo(handle, out h) == 0
+
       total = (h.dwSize.x * h.dwSize.y).to_u32
-      LibC.FillConsoleOutputCharacterW(handle, ' '.ord, total, cursor, out _)
+
+      # Fill the entire screen with blanks
+      return if LibC.FillConsoleOutputCharacterW(handle, ' '.ord, total, cursor, out _) == 0
+      # Get the current text attribute
+      return if LibC.GetConsoleScreenBufferInfo(handle, out h) == 0
+
+      # Set the buffer's attributes accordingly
       LibC.FillConsoleOutputAttribute(handle, h.wAttributes, total, cursor, out _)
     {% else %}
       print "\033[2J"
@@ -66,7 +75,9 @@ module Screen
   def move_top_left : Nil
     {% if flag?(:win32) %}
       handle = LibC.GetStdHandle(LibC::STD_OUTPUT_HANDLE)
-      cursor = LibC::COORD.new(x: 0, y: 0)
+      cursor = LibC::COORD.new # home for the cursor
+
+      # Put the cursor at its home coordinates
       LibC.SetConsoleCursorPosition(handle, cursor)
     {% else %}
       print "\033[H"
