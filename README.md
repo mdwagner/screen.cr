@@ -1,6 +1,6 @@
 # screen
 
-Port of [screen](https://github.com/inancgumus/screen) package in Go, to provide an easy way to clear the screen or move the cursor in cross-platform way (Linux, Mac OS, Windows).
+Crystal port of [screen](https://github.com/inancgumus/screen) package (Go), to provide an easy way to clear the screen or move the cursor in cross-platform way (Linux, Mac OS, Windows).
 
 ## Installation
 
