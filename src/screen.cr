@@ -3,7 +3,7 @@ module Screen
 
   VERSION = {{ `shards version #{__DIR__}`.chomp.stringify }}
 
-  {% if flag?(:win32) && compare_versions(::Crystal::VERSION, "1.7.0") == -1 %}
+  {% if flag?(:win32) && compare_versions(::Crystal::VERSION, "1.7.0") < 0 %}
     {% raise "Screen requires Crystal >= 1.7.0 for Windows" %}
   {% end %}
 
