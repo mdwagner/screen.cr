@@ -1,6 +1,12 @@
 module Screen
   extend self
 
+  VERSION = {{ `shards version #{__DIR__}`.chomp.stringify }}
+
+  {% if flag?(:win32) && compare_versions(::Crystal::VERSION, "1.7.0") == -1 %}
+    {% raise "Screen requires Crystal >= 1.7.0 for Windows" %}
+  {% end %}
+
   {% if flag?(:win32) %}
     @[Link("kernel32")]
     lib LibWindows
@@ -41,8 +47,6 @@ module Screen
       fun GetStdHandle(nStdHandle : DWORD) : HANDLE
     end
   {% end %}
-
-  VERSION = {{ `shards version #{__DIR__}`.chomp.stringify }}
 
   # Clears the screen and resets cursor position
   #
