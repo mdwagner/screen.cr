@@ -1,6 +1,6 @@
 name: screen
-version: 0.2.5
-crystal: ">= 1.7.3"
+version: 0.2.6
+crystal: ">= 1.0.0"
 
 authors:
   - Michael Wagner <mdwranger@gmail.com>
